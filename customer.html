@@ -18,8 +18,7 @@
     <script>
         const CONTRACT_ADDRESS = "0xBB8dEF1C0aA665877a53bfc0d69F2DA8DcF5dd97";
 
-        const RPC = "https://1rpc.io/eth";
-
+        const RPC = "https://eth-sepolia.g.alchemy.com/v2/iZf1PfPx4JrG22mc06JQQ";
         const ABI = [
             {
                 "anonymous": false,
@@ -543,12 +542,12 @@
             try {
                 out.innerText = "⏳ Loading batch history...";
 
-                //const provider = new ethers.JsonRpcProvider(RPC);
-                //const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
-                provider = new ethers.BrowserProvider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                signer = await provider.getSigner();
-                contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+                const provider = new ethers.JsonRpcProvider(RPC);
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+                //provider = new ethers.BrowserProvider(window.ethereum);
+                //await provider.send("eth_requestAccounts", []);
+                //signer = await provider.getSigner();
+                //contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
                 const batch = await contract.getBatchHistory(Number(batchId));
                 console.log(batch)
