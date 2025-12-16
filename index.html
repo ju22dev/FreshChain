@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌿 FreshChain</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.0/dist/ethers.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌿 FreshChain</h1>
+            <p>Blockchain Based Supply Chain Management</p>
+        </div>
+
+        <div class="connection-section">
+            <div id="connectionMessage" class="message"></div>
+
+            <button class="btn btn-primary" onclick="connectWallet()">Connect Wallet</button>
+
+            <div id="connectedInfo" class="connected-info">
+                <p><strong>Status:</strong> Connected</p>
+                <p><strong>Wallet:</strong> <span id="connectedWallet"></span></p>
+                <p><strong>Contract:</strong> <span id="connectedContract"></span></p>
+            </div>
+        </div>
+
+        <div class="user-type-selector">
+            <h2>Select Your Role</h2>
+            <div class="user-types">
+                <div class="user-type-card" onclick="selectUserType('admin')">
+                    <div class="icon">🛡️</div>
+                    <h3>Admin</h3>
+                </div>
+                <div class="user-type-card" onclick="selectUserType('producer')">
+                    <div class="icon">🌾</div>
+                    <h3>Producer</h3>
+                </div>
+                <div class="user-type-card" onclick="selectUserType('transporter')">
+                    <div class="icon">🚚</div>
+                    <h3>Transporter</h3>
+                </div>
+                <div class="user-type-card" onclick="selectUserType('distributor')">
+                    <div class="icon">🏢</div>
+                    <h3>Distributor</h3>
+                </div>
+                <div class="user-type-card" onclick="selectUserType('retailer')">
+                    <div class="icon">🏪</div>
+                    <h3>Retailer</h3>
+                </div>
+                <div class="user-type-card" onclick="selectUserType('customer')">
+                    <div class="icon">👤</div>
+                    <h3>Customer</h3>
+                </div>
+            </div>
+        </div>
+
+        <div id="adminMenu" class="menu-section">
+            <h2>Admin Functions</h2>
+            <div id="adminMessage" class="message"></div>
+
+            <div class="menu-grid">
+                <div class="menu-card">
+                    <h3>Register Producer</h3>
+                    <div class="input-group">
+                        <label>Producer Address:</label>
+                        <input type="text" id="producerAddress" placeholder="0x...">
+                    </div>
+                    <button class="btn btn-primary" onclick="registerProducer()">Register</button>
+                </div>
+
+                <div class="menu-card">
+                    <h3>Register Transporter</h3>
+                    <div class="input-group">
+                        <label>Transporter Address:</label>
+                        <input type="text" id="transporterAddress" placeholder="0x...">
+                    </div>
+                    <button class="btn btn-primary" onclick="registerTransporter()">Register</button>
+                </div>
+
+                <div class="menu-card">
+                    <h3>Register Distributor</h3>
+                    <div class="input-group">
+                        <label>Distributor Address:</label>
+                        <input type="text" id="distributorAddress" placeholder="0x...">
+                    </div>
+                    <button class="btn btn-primary" onclick="registerDistributor()">Register</button>
+                </div>
+
+                <div class="menu-card">
+                    <h3>Register Retailer</h3>
+                    <div class="input-group">
+                        <label>Retailer Address:</label>
+                        <input type="text" id="retailerAddress" placeholder="0x...">
+                    </div>
+                    <button class="btn btn-primary" onclick="registerRetailer()">Register</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="producerMenu" class="menu-section">
+            <h2>Producer Functions</h2>
+            <div id="producerMessage" class="message"></div>
+
+            <div class="menu-grid">
+                <div class="menu-card">
+                    <h3>Create New Batch</h3>
+                    <div class="input-group">
+                        <label>Batch ID:</label>
+                        <input type="number" min="1" id="newBatchId" placeholder="e.g., 1001">
+                    </div>
+                    <div class="input-group">
+                        <label>Product Name:</label>
+                        <input type="text" id="newProductName" placeholder="e.g., Organic Tomatoes">
+                    </div>
+                    <div class="input-group">
+                        <label>Quantity (kg):</label>
+                        <input type="number" min="1" id="newQuantity" placeholder="e.g., 500">
+                    </div>
+                    <button class="btn btn-success" onclick="createBatch()">Create Batch</button>
+                </div>
+
+                <div class="menu-card">
+                    <h3>Transfer Ownership</h3>
+                    <div class="input-group">
+                        <label>Batch ID:</label>
+                        <input type="number" min="1" id="transferBatchId" placeholder="Batch ID">
+                    </div>
+                    <div class="input-group">
+                        <label>New Owner Address:</label>
+                        <input type="text" id="transferNewOwner" placeholder="0x...">
+                    </div>
+                    <button class="btn btn-primary" onclick="transferOwnership()">Transfer</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="transporterMenu" class="menu-section">
+            <h2>Transporter Functions</h2>
+            <div id="transporterMessage" class="message"></div>
+
+            <div class="menu-grid">
+                <div class="menu-card">
+                    <h3>Add Sensor Data</h3>
+                    <div class="input-group">
+                        <label>Batch ID:</label>
+                        <input type="number" min="1" id="sensorBatchId" placeholder="Batch ID">
+                    </div>
+                    <div class="input-group">
+                        <label>Temperature (°C): [-10 to 40]</label>
+                        <input type="number" min="1" id="sensorTemperature" placeholder="e.g., 5" min="-10" max="40">
+                    </div>
+                    <div class="input-group">
+                        <label>Humidity (%): [0 to 40]</label>
+                        <input type="number" min="1" id="sensorHumidity" placeholder="e.g., 30" min="0" max="40">
+                    </div>
+                    <div class="input-group">
+                        <label>Location:</label>
+                        <input type="text" id="sensorLocation" placeholder="e.g., Warehouse A">
+                    </div>
+                    <button class="btn btn-success" onclick="addSensorData()">Add Reading</button>
+                </div>
+
+                <div class="menu-card">
+                    <h3>Transfer Ownership</h3>
+                    <div class="input-group">
+                        <label>Batch ID:</label>
+                        <input type="number" min="1" id="transporterTransferBatchId" placeholder="Batch ID">
+                    </div>
+                    <div class="input-group">
+                        <label>New Owner Address:</label>
+                        <input type="text" id="transporterTransferNewOwner" placeholder="0x...">
+                    </div>
+                    <button class="btn btn-primary" onclick="transporterTransferOwnership()">Transfer</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="distributorMenu" class="menu-section">
+            <h2>Distributor Functions</h2>
+            <div id="distributorMessage" class="message"></div>
+
+            <div class="menu-grid">
+                <div class="menu-card">
+                    <h3>Transfer Ownership</h3>
+                    <div class="input-group">
+                        <label>Batch ID:</label>
+                        <input type="number" min="1" id="distributorTransferBatchId" placeholder="Batch ID">
+                    </div>
+                    <div class="input-group">
+                        <label>New Owner Address:</label>
+                        <input type="text" id="distributorTransferNewOwner" placeholder="0x...">
+                    </div>
+                    <button class="btn btn-primary" onclick="distributorTransferOwnership()">Transfer</button>
+                </div>
+
+                <div class="menu-card">
+                    <h3>View Batch Details</h3>
+                    <div class="input-group">
+                        <label>Batch ID:</label>
+                        <input type="number" min="1" id="distributorViewBatchId" placeholder="Batch ID">
+                    </div>
+                    <button class="btn btn-primary" onclick="viewBatch('distributor')">View Batch</button>
+                    <div id="distributorBatchInfo" class="batch-info"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="retailerMenu" class="menu-section">
+            <h2>Retailer Functions</h2>
+            <div id="retailerMessage" class="message"></div>
+
+            <div class="menu-grid">
+                <div class="menu-card">
+                    <h3>Mark Batch as Arrived</h3>
+                    <div class="input-group">
+                        <label>Batch ID:</label>
+                        <input type="number" min="1" id="arrivedBatchId" placeholder="Batch ID">
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="inspectionPassed" checked>
+                        <label for="inspectionPassed">Passed Quality Inspection</label>
+                    </div>
+                    <button class="btn btn-success" onclick="markAsArrived()">Mark as Arrived</button>
+                </div>
+
+                <div class="menu-card">
+                    <h3>View Batch Details</h3>
+                    <div class="input-group">
+                        <label>Batch ID:</label>
+                        <input type="number" min="1" id="retailerViewBatchId" placeholder="Batch ID">
+                    </div>
+                    <button class="btn btn-primary" onclick="viewBatch('retailer')">View Batch</button>
+                    <div id="retailerBatchInfo" class="batch-info"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="customerMenu" class="menu-section">
+            <h2>Customer View</h2>
+            <div id="customerMessage" class="message"></div>
+
+            <div class="menu-grid">
+                <div class="menu-card">
+                    <h3>🔍 View Product History</h3>
+                    <div class="input-group">
+                        <label>Batch ID:</label>
+                        <input type="number" id="customerBatchId" placeholder="Enter Batch ID">
+                    </div>
+                    <button class="btn btn-primary" onclick="generateBatchQR()">Generate QR Code</button>
+
+                    <div id="qrContainer" class="qr-container">
+                        <h4>📱 Scan QR Code for Product History</h4>
+                        <img src="" id="qrcode"></img>
+                        <div id="qr-info">
+                            <p><strong>Instructions:</strong></p>
+                            <p>1. Scan this QR code with your phone</p>
+                            <p>2. View complete product journey</p>
+                            <p>3. See all temperature and humidity readings</p>
+                            <p>4. Verify product authenticity</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
