@@ -15,6 +15,13 @@ contract FreshChain {
         uint timestamp;
         address recordedBy;
     }
+
+    struct History {
+        string action;
+        address actor;
+        uint timestamp;
+        string details;
+    }
     
     struct Batch {
         uint batchId;
@@ -26,12 +33,18 @@ contract FreshChain {
         bool passedInspection;
         uint createdAt;
         SensorReading[] sensorReadings;
+        History[] history;
     }
     
     mapping(address => bool) internal producers;
     mapping(address => bool) internal transporters;
     mapping(address => bool) internal distributors;
     mapping(address => bool) internal retailers;
+
+    address[] private producersList;
+    address[] private transportersList;
+    address[] private distributorsList;
+    address[] private retailersList;
     
     mapping(uint => Batch) internal batches;
     
@@ -77,6 +90,7 @@ contract FreshChain {
         require(producer != address(0), "Invalid address");
         require(!producers[producer], "Producer already registered");
         producers[producer] = true;
+        producersList.push(producer);
         emit ProducerRegistered(producer);
     }
     
@@ -84,6 +98,7 @@ contract FreshChain {
         require(transporter != address(0), "Invalid address");
         require(!transporters[transporter], "Transporter already registered");
         transporters[transporter] = true;
+        transportersList.push(transporter);
         emit TransporterRegistered(transporter);
     }
     
@@ -91,6 +106,7 @@ contract FreshChain {
         require(distributor != address(0), "Invalid address");
         require(!distributors[distributor], "Distributor already registered");
         distributors[distributor] = true;
+        distributorsList.push(distributor);
         emit DistributorRegistered(distributor);
     }
     
@@ -98,6 +114,7 @@ contract FreshChain {
         require(retailer != address(0), "Invalid address");
         require(!retailers[retailer], "Retailer already registered");
         retailers[retailer] = true;
+        retailersList.push(retailer);
         emit RetailerRegistered(retailer);
     }
     
@@ -115,6 +132,14 @@ contract FreshChain {
         newBatch.status = BatchStatus.Created;
         newBatch.passedInspection = false;
         newBatch.createdAt = block.timestamp;
+
+        string memory details = string(abi.encodePacked("Batch created: ", productName));
+        newBatch.history.push(History({
+            action: "Created",
+            actor: msg.sender,
+            timestamp: block.timestamp,
+            details: details
+        }));
         
         emit BatchCreated(batchId, productName, quantity, msg.sender);
     }
@@ -129,6 +154,13 @@ contract FreshChain {
         // Update status to InTransit if it's the first sensor reading
         if (batch.status == BatchStatus.Created) {
             batch.status = BatchStatus.InTransit;
+
+            batch.history.push(History({
+                action: "StatusChanged",
+                actor: msg.sender,
+                timestamp: block.timestamp,
+                details: "Status changed to InTransit"
+            }));
         }
         
         SensorReading memory reading = SensorReading({
@@ -166,6 +198,20 @@ contract FreshChain {
         
         address previousOwner = batch.currentOwner;
         batch.currentOwner = newOwner;
+
+        string memory details = string(abi.encodePacked(
+            "Ownership transferred from ",
+            _addressToString(previousOwner),
+            " to ",
+            _addressToString(newOwner)
+        ));
+
+        batch.history.push(History({
+            action: "OwnershipTransferred",
+            actor: msg.sender,
+            timestamp: block.timestamp,
+            details: details
+        }));
         
         emit OwnershipTransferred(batchId, previousOwner, newOwner);
     }
@@ -177,8 +223,63 @@ contract FreshChain {
         
         batch.status = BatchStatus.Inspected;
         batch.passedInspection = passedInspection;
+
+        string memory inspectionResult = passedInspection ? "PASSED" : "FAILED";
+        string memory details = string(abi.encodePacked("Inspection completed - Result: ", inspectionResult));
+        
+        batch.history.push(History({
+            action: "Inspected",
+            actor: msg.sender,
+            timestamp: block.timestamp,
+            details: details
+        }));
         
         emit BatchArrived(batchId, passedInspection);
+    }
+
+    function _intToString(int value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        
+        bool negative = value < 0;
+        uint absValue = uint(negative ? -value : value);
+        
+        uint temp = absValue;
+        uint digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        
+        bytes memory buffer = new bytes(negative ? digits + 1 : digits);
+        uint index = buffer.length;
+        
+        while (absValue != 0) {
+            index--;
+            buffer[index] = bytes1(uint8(48 + absValue % 10));
+            absValue /= 10;
+        }
+        
+        if (negative) {
+            buffer[0] = "-";
+        }
+        
+        return string(buffer);
+    }
+    
+    // Helper function to convert address to string
+    function _addressToString(address addr) internal pure returns (string memory) {
+        bytes memory data = abi.encodePacked(addr);
+        bytes memory alphabet = "0123456789abcdef";
+        bytes memory str = new bytes(42);
+        str[0] = '0';
+        str[1] = 'x';
+        for (uint i = 0; i < 20; i++) {
+            str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+            str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+        }
+        return string(str);
     }
     
     // View Functions
@@ -222,7 +323,8 @@ contract FreshChain {
         BatchStatus status,
         bool passedInspection,
         uint createdAt,
-        SensorReading[] memory sensorReadings
+        SensorReading[] memory sensorReadings,
+        History[] memory historyLog
     ) {
         Batch storage batch = batches[batchId];
         
@@ -235,7 +337,24 @@ contract FreshChain {
             batch.status,
             batch.passedInspection,
             batch.createdAt,
-            batch.sensorReadings
+            batch.sensorReadings,
+            batch.history
+        );
+    }
+
+    function getAllEntities() public view returns (
+        address theAdmin,
+        address[] memory allProducers,
+        address[] memory allTransporters,
+        address[] memory allDistributors,
+        address[] memory allRetailers
+    ) {
+        return (
+            owner,
+            producersList,
+            transportersList,
+            distributorsList,
+            retailersList
         );
     }
 }

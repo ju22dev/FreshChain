@@ -55,6 +55,10 @@
                     <div class="icon">👤</div>
                     <h3>Customer</h3>
                 </div>
+                <div class="user-type-card" onclick="selectUserType('entities')">
+                    <div class="icon">⛓</div>
+                    <h3>Actors</h3>
+                </div>
             </div>
         </div>
 
@@ -261,8 +265,25 @@
                             <p>2. View complete product journey</p>
                             <p>3. See all temperature and humidity readings</p>
                             <p>4. Verify product authenticity</p>
+                            <p><a id="qr-code-url">Go to URL</a></p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="entitiesMenu" class="menu-section">
+            <h2>Get the Address of Actors</h2>
+            <div id="entitieesMessage" class="message"></div>
+
+            <div class="menu-grid">
+                <div class="menu-card">
+                    <button class="btn btn-primary" onclick="getAllEntities()">Get</button>
+                    <div id="entity-info">
+
+                    </div>
+                    
                 </div>
             </div>
         </div>

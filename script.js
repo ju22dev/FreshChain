@@ -1,28 +1,574 @@
 let provider, signer, contract;
 
-const CONTRACT_ADDRESS = "0xBB8dEF1C0aA665877a53bfc0d69F2DA8DcF5dd97"
+const CONTRACT_ADDRESS = "0x50e31814E55e1ae19F7C0b2c1f5276f109Ed55BE"
 const CONTRACT_ABI = [
-    {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
-    {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"batchId","type":"uint256"},{"indexed":false,"internalType":"bool","name":"passedInspection","type":"bool"}],"name":"BatchArrived","type":"event"},
-    {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"batchId","type":"uint256"},{"indexed":false,"internalType":"string","name":"productName","type":"string"},{"indexed":false,"internalType":"uint256","name":"quantity","type":"uint256"},{"indexed":false,"internalType":"address","name":"producer","type":"address"}],"name":"BatchCreated","type":"event"},
-    {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"distributor","type":"address"}],"name":"DistributorRegistered","type":"event"},
-    {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"batchId","type":"uint256"},{"indexed":false,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"address","name":"to","type":"address"}],"name":"OwnershipTransferred","type":"event"},
-    {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"producer","type":"address"}],"name":"ProducerRegistered","type":"event"},
-    {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"retailer","type":"address"}],"name":"RetailerRegistered","type":"event"},
-    {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"batchId","type":"uint256"},{"indexed":false,"internalType":"int256","name":"temperature","type":"int256"},{"indexed":false,"internalType":"int256","name":"humidity","type":"int256"},{"indexed":false,"internalType":"string","name":"location","type":"string"}],"name":"SensorDataAdded","type":"event"},
-    {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"transporter","type":"address"}],"name":"TransporterRegistered","type":"event"},
-    {"inputs":[{"internalType":"uint256","name":"batchId","type":"uint256"},{"internalType":"int256","name":"temperature","type":"int256"},{"internalType":"int256","name":"humidity","type":"int256"},{"internalType":"string","name":"location","type":"string"}],"name":"addSensorData","outputs":[],"stateMutability":"nonpayable","type":"function"},
-    {"inputs":[{"internalType":"uint256","name":"batchId","type":"uint256"},{"internalType":"string","name":"productName","type":"string"},{"internalType":"uint256","name":"quantity","type":"uint256"}],"name":"createBatch","outputs":[],"stateMutability":"nonpayable","type":"function"},
-    {"inputs":[{"internalType":"uint256","name":"batchId","type":"uint256"}],"name":"getBatch","outputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"string","name":"","type":"string"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"},{"internalType":"enum FreshChain.BatchStatus","name":"","type":"uint8"},{"internalType":"bool","name":"","type":"bool"},{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-    {"inputs":[{"internalType":"uint256","name":"batchId","type":"uint256"}],"name":"getBatchHistory","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"string","name":"productName","type":"string"},{"internalType":"uint256","name":"quantity","type":"uint256"},{"internalType":"address","name":"currentOwner","type":"address"},{"internalType":"address","name":"producer","type":"address"},{"internalType":"enum FreshChain.BatchStatus","name":"status","type":"uint8"},{"internalType":"bool","name":"passedInspection","type":"bool"},{"internalType":"uint256","name":"createdAt","type":"uint256"},{"components":[{"internalType":"int256","name":"temperature","type":"int256"},{"internalType":"int256","name":"humidity","type":"int256"},{"internalType":"string","name":"location","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"recordedBy","type":"address"}],"internalType":"struct FreshChain.SensorReading[]","name":"sensorReadings","type":"tuple[]"}],"stateMutability":"view","type":"function"},
-    {"inputs":[{"internalType":"uint256","name":"batchId","type":"uint256"}],"name":"getSensorReadingCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-    {"inputs":[{"internalType":"uint256","name":"batchId","type":"uint256"}],"name":"getSensorReadings","outputs":[{"components":[{"internalType":"int256","name":"temperature","type":"int256"},{"internalType":"int256","name":"humidity","type":"int256"},{"internalType":"string","name":"location","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"recordedBy","type":"address"}],"internalType":"struct FreshChain.SensorReading[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},
-    {"inputs":[{"internalType":"uint256","name":"batchId","type":"uint256"},{"internalType":"bool","name":"passedInspection","type":"bool"}],"name":"markAsArrived","outputs":[],"stateMutability":"nonpayable","type":"function"},
-    {"inputs":[{"internalType":"address","name":"distributor","type":"address"}],"name":"registerDistributor","outputs":[],"stateMutability":"nonpayable","type":"function"},
-    {"inputs":[{"internalType":"address","name":"producer","type":"address"}],"name":"registerProducer","outputs":[],"stateMutability":"nonpayable","type":"function"},
-    {"inputs":[{"internalType":"address","name":"retailer","type":"address"}],"name":"registerRetailer","outputs":[],"stateMutability":"nonpayable","type":"function"},
-    {"inputs":[{"internalType":"address","name":"transporter","type":"address"}],"name":"registerTransporter","outputs":[],"stateMutability":"nonpayable","type":"function"},
-    {"inputs":[{"internalType":"uint256","name":"batchId","type":"uint256"},{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "passedInspection",
+                "type": "bool"
+            }
+        ],
+        "name": "BatchArrived",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "productName",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "quantity",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "producer",
+                "type": "address"
+            }
+        ],
+        "name": "BatchCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "distributor",
+                "type": "address"
+            }
+        ],
+        "name": "DistributorRegistered",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "producer",
+                "type": "address"
+            }
+        ],
+        "name": "ProducerRegistered",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "retailer",
+                "type": "address"
+            }
+        ],
+        "name": "RetailerRegistered",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "temperature",
+                "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "humidity",
+                "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "location",
+                "type": "string"
+            }
+        ],
+        "name": "SensorDataAdded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "transporter",
+                "type": "address"
+            }
+        ],
+        "name": "TransporterRegistered",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "int256",
+                "name": "temperature",
+                "type": "int256"
+            },
+            {
+                "internalType": "int256",
+                "name": "humidity",
+                "type": "int256"
+            },
+            {
+                "internalType": "string",
+                "name": "location",
+                "type": "string"
+            }
+        ],
+        "name": "addSensorData",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "productName",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "quantity",
+                "type": "uint256"
+            }
+        ],
+        "name": "createBatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "passedInspection",
+                "type": "bool"
+            }
+        ],
+        "name": "markAsArrived",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "distributor",
+                "type": "address"
+            }
+        ],
+        "name": "registerDistributor",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "producer",
+                "type": "address"
+            }
+        ],
+        "name": "registerProducer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "retailer",
+                "type": "address"
+            }
+        ],
+        "name": "registerRetailer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "transporter",
+                "type": "address"
+            }
+        ],
+        "name": "registerTransporter",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "getAllEntities",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "theAdmin",
+                "type": "address"
+            },
+            {
+                "internalType": "address[]",
+                "name": "allProducers",
+                "type": "address[]"
+            },
+            {
+                "internalType": "address[]",
+                "name": "allTransporters",
+                "type": "address[]"
+            },
+            {
+                "internalType": "address[]",
+                "name": "allDistributors",
+                "type": "address[]"
+            },
+            {
+                "internalType": "address[]",
+                "name": "allRetailers",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getBatch",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "enum FreshChain.BatchStatus",
+                "name": "",
+                "type": "uint8"
+            },
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getBatchHistory",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "productName",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "quantity",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "currentOwner",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "producer",
+                "type": "address"
+            },
+            {
+                "internalType": "enum FreshChain.BatchStatus",
+                "name": "status",
+                "type": "uint8"
+            },
+            {
+                "internalType": "bool",
+                "name": "passedInspection",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "createdAt",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "int256",
+                        "name": "temperature",
+                        "type": "int256"
+                    },
+                    {
+                        "internalType": "int256",
+                        "name": "humidity",
+                        "type": "int256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "location",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "recordedBy",
+                        "type": "address"
+                    }
+                ],
+                "internalType": "struct FreshChain.SensorReading[]",
+                "name": "sensorReadings",
+                "type": "tuple[]"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "action",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "actor",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "details",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct FreshChain.History[]",
+                "name": "historyLog",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getSensorReadingCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "batchId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getSensorReadings",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "int256",
+                        "name": "temperature",
+                        "type": "int256"
+                    },
+                    {
+                        "internalType": "int256",
+                        "name": "humidity",
+                        "type": "int256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "location",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "recordedBy",
+                        "type": "address"
+                    }
+                ],
+                "internalType": "struct FreshChain.SensorReading[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
 ];
 
 function showMessage(elementId, type, text) {
@@ -410,7 +956,74 @@ async function generateBatchQR() {
     const url = `https://ju22dev.github.io/FreshChain/customer.html?batchId=${batchId}`;
 
     document.getElementById('qrcode').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-    
-    document.getElementById('qr-info').innerHTML += `<a href=${url}>Go to URL</a>`;
+
+    document.getElementById('qr-code-url').href = url
     showMessage('customerMessage', 'success', 'QR Code generated! Scan to view product history.');
+}
+
+async function getAllEntities() {
+    const infoElem = document.getElementById("entity-info");
+    try {
+        const response = await contract.getAllEntities();
+
+        const owner = response[0];
+        const producers = response[1];
+        const transporters = response[2];
+        const distributors = response[3];
+        const retailers = response[4];
+
+        let html = '<h3>Supply Chain Entities</h3>';
+
+        html += '<div><strong>Admin:</strong> ' + owner + '</div><br>';
+
+        html += '<div><strong>Producers (' + producers.length + '):</strong></div>';
+        if (producers.length > 0) {
+            html += '<ul>';
+            producers.forEach(addr => {
+                html += '<li>' + addr + '</li>';
+            });
+            html += '</ul>';
+        } else {
+            html += '<p>No producers registered</p>';
+        }
+
+        html += '<div><strong>Transporters (' + transporters.length + '):</strong></div>';
+        if (transporters.length > 0) {
+            html += '<ul>';
+            transporters.forEach(addr => {
+                html += '<li>' + addr + '</li>';
+            });
+            html += '</ul>';
+        } else {
+            html += '<p>No transporters registered</p>';
+        }
+
+        html += '<div><strong>Distributors (' + distributors.length + '):</strong></div>';
+        if (distributors.length > 0) {
+            html += '<ul>';
+            distributors.forEach(addr => {
+                html += '<li>' + addr + '</li>';
+            });
+            html += '</ul>';
+        } else {
+            html += '<p>No distributors registered</p>';
+        }
+
+        html += '<div><strong>Retailers (' + retailers.length + '):</strong></div>';
+        if (retailers.length > 0) {
+            html += '<ul>';
+            retailers.forEach(addr => {
+                html += '<li>' + addr + '</li>';
+            });
+            html += '</ul>';
+        } else {
+            html += '<p>No retailers registered</p>';
+        }
+
+        infoElem.innerHTML = html;
+
+    } catch (e) {
+        console.log(e.message);
+        alert("Please connect the contract with your provider (i.e Metamask)")
+    }
 }
